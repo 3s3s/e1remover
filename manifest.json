@@ -1,0 +1,42 @@
+{
+  "name": "E1 posts remover",
+  "version": "1.0",
+  "manifest_version": 2,
+  "description": "Remove your posts from E1 forum",
+  
+  "applications": {
+    "gecko": {
+      "id": "e1_post_remover@e1.ru",
+      "strict_min_version": "45.0"
+    }
+  },
+
+  "icons": {
+    "48": "icons/toolbar.png"
+  },
+
+  "browser_action": {
+    "default_icon": "icons/toolbar.png",
+    "default_title": "E1 post remover",
+    "default_popup": "popup/choose_forum.html"
+  },
+
+  "content_scripts": [
+    {
+      "all_frames": true, 
+      "js": [
+        "content/browserOverlay.js"
+      ], 
+      "matches": [
+        "*://*.e1.ru/*" 
+      ], 
+      "run_at": "document_start"
+    }
+  ],
+  
+  "minimum_chrome_version": "18.0",
+  
+  "permissions": [
+    "https://*.e1.ru/talk/forum/*"
+  ]
+}
