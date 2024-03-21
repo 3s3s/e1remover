@@ -69,7 +69,7 @@ function StartRemove(authorName, forumID)
 	location.href = redirect
 }
 
-async function StartRemovingOnCurrentPage(doc, fid)
+async function StartRemovingOnCurrentPage(doc, fid, page=0)
 {
 	const links = doc.getElementsByTagName('A');
 	let posts = []
@@ -87,7 +87,10 @@ async function StartRemovingOnCurrentPage(doc, fid)
 	let deleted = 0;
 	for (let j=0; j<posts.length; j++)
 	{
-		await sleep(1000)
+		if (!g_continue)
+			break;
+		
+		await sleep(500)
 
 		const ret = await DeleteMessage(doc, posts[j], deleted)
 		if (ret != 0 && needAlert)
@@ -98,16 +101,19 @@ async function StartRemovingOnCurrentPage(doc, fid)
 
 			g_continue = false;
 			doc.getElementById("continue").textContent ='Продолжить';
-		}
-		if (!g_continue)
-		{
-			window.location.reload();
 			break;
 		}
-
 		deleted++;
 	}
-	window.location.reload();
+
+	await sleep(1000)
+	const currentHREF = window.location.href
+	const index = currentHREF.indexOf("&p=") != -1 ? currentHREF.indexOf("&p=") : currentHREF.length; 
+	if (g_continue)
+		window.location.href = currentHREF.substring(0, index)+"&p="+(page*1+1);
+	else
+		window.location.href = currentHREF.substring(0, index)+"&p=0";
+
 }
 
 function DeleteMessage(doc, post, j)
@@ -152,7 +158,9 @@ var gPlugin = {
 		if (!fid)
 			return;
 
-		StartRemovingOnCurrentPage(doc, fid)
+		const p = urlParams.get('p')
+
+		StartRemovingOnCurrentPage(doc, fid, p)
 
 	},
 }
@@ -187,6 +195,9 @@ const interval = setInterval(() => {
 
 		gPlugin.onPageLoad({originalTarget: document})
 	}
+	
+	const urlParams = new URLSearchParams(window.location.search);
+	const page = urlParams.get('p') || 0
 
 	let input = document.createElement('input');
 	input.setAttribute("readonly", "true")
@@ -197,7 +208,7 @@ const interval = setInterval(() => {
 	let input2 = document.createElement('input');
 	input2.setAttribute("id", "checkbox")
 	input2.setAttribute("type", "checkbox")
-	input2.setAttribute("checked", "true")
+	input2.checked = page*1 == 0 ? true : false;
 
 	let label2 = document.createElement('label');
 	label2.setAttribute("for", "checkbox")
@@ -212,4 +223,7 @@ const interval = setInterval(() => {
 	document.body.insertBefore(divTop2, document.body.firstChild)	
 
 	clearInterval(interval)
+
+	if (page != 0)
+		button.onclick();
 }, 1000)
