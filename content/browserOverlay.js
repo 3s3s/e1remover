@@ -106,6 +106,9 @@ async function StartRemovingOnCurrentPage(doc, fid, page=0)
 		deleted++;
 	}
 
+	if (!posts.length)
+		g_continue = false;
+
 	await sleep(1000)
 	const currentHREF = window.location.href
 	const index = currentHREF.indexOf("&p=") != -1 ? currentHREF.indexOf("&p=") : currentHREF.length; 
